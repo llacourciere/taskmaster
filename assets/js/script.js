@@ -44,44 +44,6 @@ var loadTasks = function () {
 var saveTasks = function () {
   localStorage.setItem("tasks", JSON.stringify(tasks));
 };
-$(".list-group").on("click", "p", function() {
-  var text = $(this)
-    .text()
-    .trim();
-  var textInput = $('<textaread>')
-    .addClass('form-control')
-    .val(text);
-  $(this).replaceWith(textInput);
-  textInput.trigger('focus');  
-});
-
-$('.list-group').on('blur', 'textarea', function () {
-  var text = $(this)
-  .val()
-  .trim();
-
-  var status = $(this)
-    .closest('.list-group')
-    .attr('id')
-    .replace('list-', '');
-
-  var index = $(this)
-    .closest('.list-group-item')
-    .index();
-
-    tasks[status][index].text = text;
-    saveTasks();
-
-    //recreate p element
-  var taskP = $('<p>')
-    .addClass('m-1')
-    .text(text);
-  //replacce text area with p element
-    $(this).replaceWith(taskP);
-});
-
-
-
 
 // modal was triggered
 $("#task-form-modal").on("show.bs.modal", function () {
@@ -115,6 +77,80 @@ $("#task-form-modal .btn-primary").click(function () {
 
     saveTasks();
   }
+});
+//task item was clicked
+$(".list-group").on("click", "p", function() {
+  var text = $(this)
+    .text()
+    .trim();
+  var textInput = $('<textarea>').addClass('form-control').val(text);
+  $(this).replaceWith(textInput);
+  textInput.trigger('focus');  
+});
+//editing the task item
+$('.list-group').on('blur', 'textarea', function () {
+  var text = $(this).val();
+
+  var status = $(this)
+    .closest('.list-group')
+    .attr('id')
+    .replace('list-', '');
+
+  var index = $(this)
+    .closest('.list-group-item')
+    .index();
+
+    tasks[status][index].text = text;
+    saveTasks();
+
+    //recreate p element
+  var taskP = $('<p>')
+    .addClass('m-1')
+    .text(text);
+  //replacce text area with p element
+    $(this).replaceWith(taskP);
+});
+
+//due date was clicked
+$('.list-group').on('click', 'span', function(){
+  //get current text
+  var date = $(this)
+    .text()
+    .trim();
+  //creat new input element
+  var dateInput = $('<input>')
+    .attr('type', 'text')
+    .addClass('form-control')
+    .val(date);
+
+  $(this).replaceWith(dateInput);
+
+  //automatically focus on new element
+  dateInput.trigger('focus');
+});
+
+$('.list-group').on('blur',"input[type='text']", function(){
+  // get current text
+  var date = $(this)
+  .val()
+  .trim();
+  // get the parent ul's id attribute
+  var status = $(this)
+    .closest('.list-group')
+    .attr('id')
+    .replace('list-','');
+  
+  var index = $(this)
+    .closest('.list-group-item')
+    .index();
+
+  tasks[status][index].date = date;
+  saveTasks();
+
+  var taskSpan = $('<span>')
+    .addClass('bade badge-primary badge-pill')
+    .text(date);
+  $(this).replaceWith(taskSpan);
 });
 
 // remove all tasks
