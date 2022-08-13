@@ -13,7 +13,7 @@ var createTask = function (taskText, taskDate, taskList) {
   // append span and p element to parent li
   taskLi.append(taskSpan, taskP);
 
-
+  auditTask(taskLi);
   // append to ul list on the page
   $("#list-" + taskList).append(taskLi);
 };
@@ -78,6 +78,10 @@ $("#task-form-modal .btn-primary").click(function () {
     saveTasks();
   }
 });
+//show datepicker 
+$("#modalDueDate").datepicker({
+  minDate: 1
+});
 //task item was clicked
 $(".list-group").on("click", "p", function() {
   var text = $(this)
@@ -125,11 +129,19 @@ $('.list-group').on('click', 'span', function(){
 
   $(this).replaceWith(dateInput);
 
+  //enable datepicker
+  dateInput.datepicker({
+    minDate: 1,
+    onClose: function() {
+      $(this).trigger('change');
+    }
+  });
+
   //automatically focus on new element
   dateInput.trigger('focus');
 });
 
-$('.list-group').on('blur',"input[type='text']", function(){
+$('.list-group').on('change',"input[type='text']", function(){
   // get current text
   var date = $(this)
   .val()
@@ -151,6 +163,9 @@ $('.list-group').on('blur',"input[type='text']", function(){
     .addClass('bade badge-primary badge-pill')
     .text(date);
   $(this).replaceWith(taskSpan);
+
+  auditTask($(taskSpan)
+    .closest('.list-group-item'));
 });
 
 // remove all tasks
@@ -161,6 +176,26 @@ $("#remove-tasks").on("click", function () {
   }
   saveTasks();
 });
+
+var auditTask = function(taskEl) {
+  
+  var date = $(taskEl).find('span').text().trim();
+  console.log(date);
+
+  var time = moment(date, 'L').set('hour', 17);
+  
+  // remove any old classes from element
+  $(taskEl).removeClass("list-group-item-warning list-group-item-danger");
+
+  // apply new class if task is near/over due date
+  if (moment().isAfter(time)) {
+    $(taskEl).addClass("list-group-item-danger");
+  }
+
+  else if(Math.abs(moment().diff(time, 'days'))<=2) {
+    $(taskEl).addClass('list-group-item-warning');
+  }
+};
 
 //allow tasks to be sorted or dragged to a different status
 $('.card .list-group').sortable({
